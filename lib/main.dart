@@ -340,19 +340,19 @@ class CardWidget extends StatelessWidget {
           child: FlipCard(
             isFlipped: card.isFlipped,
             frontWidget: Image.asset(
-              'assets/ghostcard.png',
+              'lib/assets/ghostcard.png',
               fit: BoxFit.cover,
             ),
             backWidget: card.isMatched
                 ? Container(
                     color: Colors.white,
                     child: Image.asset(
-                      'assets/${card.imageAsset}',
+                      'lib/assets/${card.imageAsset}',
                       fit: BoxFit.cover,
                     ),
                   )
                 : Image.asset(
-                    'assets/${card.imageAsset}',
+                    'lib/assets/${card.imageAsset}',
                     fit: BoxFit.cover,
                   ),
           ),

@@ -337,24 +337,49 @@ class CardWidget extends StatelessWidget {
             }
             gameModel.flipCard(index);
           },
-          child: FlipCard(
-            isFlipped: card.isFlipped,
-            frontWidget: Image.asset(
-              'lib/assets/ghostcard.png',
-              fit: BoxFit.cover,
+          child: Container(
+            // Fixed size container for consistent card dimensions
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 3,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
-            backWidget: card.isMatched
-                ? Container(
-                    color: Colors.white,
-                    child: Image.asset(
-                      'lib/assets/${card.imageAsset}',
-                      fit: BoxFit.cover,
-                    ),
-                  )
-                : Image.asset(
-                    'lib/assets/${card.imageAsset}',
-                    fit: BoxFit.cover,
-                  ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: FlipCard(
+                isFlipped: card.isFlipped,
+                frontWidget: Image.asset(
+                  'lib/assets/ghostcard.png',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+                backWidget: card.isMatched
+                    ? Container(
+                        color: Colors.white,
+                        width: double.infinity,
+                        height: double.infinity,
+                        child: Image.asset(
+                          'lib/assets/${card.imageAsset}',
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        color: Colors.white,
+                        child: Image.asset(
+                          'lib/assets/${card.imageAsset}',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+              ),
+            ),
           ),
         );
       },
@@ -433,6 +458,7 @@ class FlipCardState extends State<FlipCard>
   @override
   Widget build(BuildContext context) {
     return Stack(
+      fit: StackFit.expand, // Make stack fill its parent
       children: [
         // Front side (card back)
         AnimatedBuilder(
@@ -441,12 +467,21 @@ class FlipCardState extends State<FlipCard>
             final transform = Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateY(_frontRotation.value);
-            return Transform(
-              transform: transform,
-              alignment: Alignment.center,
-              child: widget.frontWidget,
+            // Hide backside when rotated beyond 90 degrees
+            final visible = _frontRotation.value < pi / 2;
+            return Visibility(
+              visible: visible,
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: true,
+              child: Transform(
+                transform: transform,
+                alignment: Alignment.center,
+                child: child,
+              ),
             );
           },
+          child: SizedBox.expand(child: widget.frontWidget),
         ),
         // Back side (card front)
         AnimatedBuilder(
@@ -455,12 +490,21 @@ class FlipCardState extends State<FlipCard>
             final transform = Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateY(_backRotation.value);
-            return Transform(
-              transform: transform,
-              alignment: Alignment.center,
-              child: widget.isFlipped ? widget.backWidget : Container(),
+            // Hide frontside when not fully rotated
+            final visible = _backRotation.value < pi / 2;
+            return Visibility(
+              visible: visible,
+              maintainState: true,
+              maintainAnimation: true,
+              maintainSize: true,
+              child: Transform(
+                transform: transform,
+                alignment: Alignment.center,
+                child: child,
+              ),
             );
           },
+          child: SizedBox.expand(child: widget.backWidget),
         ),
       ],
     );
